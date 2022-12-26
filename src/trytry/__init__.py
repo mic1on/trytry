@@ -7,6 +7,7 @@ class TryTry:
 
     def __init__(self):
         self.exception_: Dict[Any, List] = defaultdict(list)
+        self.finally_: Dict[Any, List] = defaultdict(list)
 
     def __call__(self, *args, **kwargs):
         return self.try_(*args, **kwargs)
@@ -31,8 +32,13 @@ class TryTry:
 
                 for handler in handlers:
                     handler(func, e)
+            finally:
+                # finally仅支持指定函数
+                for f in self.finally_.get(func.__name__, []):
+                    f()
 
         wrapper.exception = lambda *exceptions: self._except_f(wrapper, *exceptions)
+        wrapper.finally_ = lambda f: self._finally_f(wrapper, f)
         return wrapper
 
     def _except_f(self, wrapper, *exceptions):
@@ -43,6 +49,10 @@ class TryTry:
             return f
 
         return decorator
+
+    def _finally_f(self, wrapper, func):
+        """指定函数的finally处理"""
+        self.finally_[wrapper.__name__].append(func)
 
     def exception(self, *exceptions):
         """全局异常处理"""
