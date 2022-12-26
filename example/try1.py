@@ -21,6 +21,11 @@ def handle_file_not_found_error(func, e):
     print(func.__name__, str(e))
 
 
+@my_function.finally_
+def my_function_finally():
+    print(my_function.__name__, "finally")
+
+
 if __name__ == '__main__':
     my_function()
     my_function2()
